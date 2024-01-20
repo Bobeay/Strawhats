@@ -4,29 +4,43 @@ local Humanoid = Character:WaitForChild("Humanoid")
 
 -- Variables
 local isSprinting = false
+local sprintSpeed = 40
 local originalWalkSpeed = Humanoid.WalkSpeed
-local sprintSpeed = 40 -- Decreased from 50 to 30 (50 - 20 = 30)
+local cooldownTime = 10
+local cooldownActive = false
 
 -- Function to toggle sprint
 local function toggleSprint()
-	isSprinting = not isSprinting
-	if isSprinting then
-		Humanoid.WalkSpeed = sprintSpeed
-	else
-		Humanoid.WalkSpeed = originalWalkSpeed
-	end
+    if cooldownActive then
+        return
+    end
+
+    isSprinting = not isSprinting
+
+    if isSprinting then
+        Humanoid.WalkSpeed = sprintSpeed
+        wait(cooldownTime)
+        isSprinting = false
+        cooldownActive = true
+
+        -- Cooldown timer
+        wait(cooldownTime)
+        cooldownActive = false
+    else
+        Humanoid.WalkSpeed = originalWalkSpeed
+    end
 end
 
 -- Connect the function to a user input (e.g., LeftShift key)
 local UserInputService = game:GetService("UserInputService")
 UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-	if not gameProcessedEvent and input.KeyCode == Enum.KeyCode.LeftShift then
-		toggleSprint()
-	end
+    if not gameProcessedEvent and input.KeyCode == Enum.KeyCode.LeftShift then
+        toggleSprint()
+    end
 end)
 
 UserInputService.InputEnded:Connect(function(input)
-	if input.KeyCode == Enum.KeyCode.LeftShift then
-		toggleSprint()
-	end
+    if input.KeyCode == Enum.KeyCode.LeftShift then
+        toggleSprint()
+    end
 end)
