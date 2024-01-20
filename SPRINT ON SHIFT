@@ -1,34 +1,32 @@
-local mouse = game.Players.LocalPlayer:GetMouse()
-local running = false
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
 
-function getTool()	
-	for _, kid in ipairs(script.Parent:GetChildren()) do
-		if kid.className == "Tool" then return kid end
+-- Variables
+local isSprinting = false
+local originalWalkSpeed = Humanoid.WalkSpeed
+local sprintSpeed = 40 -- Decreased from 50 to 30 (50 - 20 = 30)
+
+-- Function to toggle sprint
+local function toggleSprint()
+	isSprinting = not isSprinting
+	if isSprinting then
+		Humanoid.WalkSpeed = sprintSpeed
+	else
+		Humanoid.WalkSpeed = originalWalkSpeed
 	end
-	return nil
 end
 
+-- Connect the function to a user input (e.g., LeftShift key)
+local UserInputService = game:GetService("UserInputService")
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+	if not gameProcessedEvent and input.KeyCode == Enum.KeyCode.LeftShift then
+		toggleSprint()
+	end
+end)
 
-mouse.KeyDown:connect(function (key) -- Run function
-	key = string.lower(key)
-	if string.byte(key) == 48 then
-		running = true
-		local keyConnection = mouse.KeyUp:connect(function (key)
-			if string.byte(key) == 48 then
-				running = false
-			end
-		end)
-		for i = 1,5 do
-			game.Workspace.CurrentCamera.FieldOfView = (70+(i*2))
-			wait()
-		end
-		game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 35
-		repeat wait () until running == false
-		keyConnection:disconnect()
-		game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
-		for i = 1,5 do
-			game.Workspace.CurrentCamera.FieldOfView = (80-(i*2))
-			wait()
-		end
+UserInputService.InputEnded:Connect(function(input)
+	if input.KeyCode == Enum.KeyCode.LeftShift then
+		toggleSprint()
 	end
 end)
